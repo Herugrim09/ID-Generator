@@ -26,7 +26,7 @@ CLASS zcl_mdg_sg_acct_id_gen DEFINITION
   PRIVATE SECTION.
 
     CONSTANTS:
-      lc_are           TYPE name_komp VALUE 'ARE',
+      lc_comp_code     TYPE name_komp VALUE 'COMP_CODE' ##NEEDED,
       lc_bank_code     TYPE name_komp VALUE 'BANK_CODE',
       lc_currency      TYPE name_komp VALUE 'CURRENCY',
       lc_account_group TYPE name_komp VALUE 'ACCOUNT_GROUP',
