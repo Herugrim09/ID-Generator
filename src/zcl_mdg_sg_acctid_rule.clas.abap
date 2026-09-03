@@ -6,7 +6,7 @@
 "! hard-coded rule tables (ZCL_MDG_SG_ACCT_RULES).
 CLASS zcl_mdg_sg_acctid_rule DEFINITION
   PUBLIC
-  INHERITING FROM zcl_mdg_acctid_rule
+  INHERITING FROM zcl_mdg_sgre_acc_id_a_gen
   FINAL
   CREATE PUBLIC.
 
