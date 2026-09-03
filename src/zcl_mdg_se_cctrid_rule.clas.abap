@@ -12,12 +12,12 @@ CLASS zcl_mdg_se_cctrid_rule DEFINITION
   PUBLIC SECTION.
     METHODS if_fpm_guibb_form~get_data REDEFINITION .
     METHODS if_fpm_guibb_form~get_definition REDEFINITION .
-    METHODS ovs_handle_phase_2 REDEFINITION .
     METHODS if_fpm_guibb~initialize REDEFINITION .
 
   PROTECTED SECTION.
     DATA it_profit_centers TYPE usmdz10_ts_ovs_output .
     METHODS on_zattr_selected REDEFINITION .
+    METHODS ovs_handle_phase_2 REDEFINITION .
 
   PRIVATE SECTION.
 

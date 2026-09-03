@@ -13,9 +13,10 @@ CLASS zcl_mdg_sg_acc_id_a_gen DEFINITION
   PUBLIC SECTION.
     METHODS if_fpm_guibb~initialize REDEFINITION .
     METHODS if_fpm_guibb_form~get_definition REDEFINITION .
-    METHODS ovs_handle_phase_2 REDEFINITION .
 
   PROTECTED SECTION.
+    METHODS ovs_handle_phase_2 REDEFINITION .
+
   PRIVATE SECTION.
 
     CONSTANTS:
