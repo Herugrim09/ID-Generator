@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_DTEL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD04V>
+    <ROLLNAME>ZE_MDG_ACCT_GROUP_KIND</ROLLNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <DATATYPE>CHAR</DATATYPE>
+    <LENG>000010</LENG>
+    <OUTPUTLEN>000010</OUTPUTLEN>
+    <DDTEXT>MDG ID Gen: Account Group Kind</DDTEXT>
+    <REPTEXT>Group Kind</REPTEXT>
+    <SCRTEXT_S>Kind</SCRTEXT_S>
+    <SCRTEXT_M>Group Kind</SCRTEXT_M>
+    <SCRTEXT_L>Account Group Kind</SCRTEXT_L>
+   </DD04V>
+  </asx:values>
+ </asx:abap>
+</abapGit>
