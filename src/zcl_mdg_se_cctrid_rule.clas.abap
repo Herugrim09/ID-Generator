@@ -12,7 +12,7 @@ CLASS zcl_mdg_se_cctrid_rule DEFINITION
   PUBLIC SECTION.
     METHODS if_fpm_guibb_form~get_data REDEFINITION .
     METHODS if_fpm_guibb_form~get_definition REDEFINITION .
-    METHODS if_fpm_guibb_ovs~handle_phase_2 REDEFINITION .
+    METHODS ovs_handle_phase_2 REDEFINITION .
     METHODS if_fpm_guibb~initialize REDEFINITION .
 
   PROTECTED SECTION.
@@ -24,15 +24,15 @@ CLASS zcl_mdg_se_cctrid_rule DEFINITION
     METHODS ovs_output_profit_center
       IMPORTING
         !pfd_i_field_name      TYPE name_komp
-        !prd_i_query_parameter TYPE data
+        !prd_i_query_parameter TYPE REF TO data
       EXPORTING
-        !prd_e_output          TYPE data .
+        !prd_e_output          TYPE REF TO data .
     METHODS ovs_output_cts_sub_func
       IMPORTING
         !pfd_i_field_name      TYPE name_komp
-        !prd_i_query_parameter TYPE data
+        !prd_i_query_parameter TYPE REF TO data
       EXPORTING
-        !prd_e_output          TYPE data .
+        !prd_e_output          TYPE REF TO data .
     METHODS get_cts_sub_functions
       IMPORTING
         !pfd_i_cts_main TYPE ze_mdg_cost_center_cts_func
@@ -182,36 +182,26 @@ CLASS zcl_mdg_se_cctrid_rule IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD if_fpm_guibb_ovs~handle_phase_2.
-    DATA lrd_data TYPE REF TO data.
-    FIELD-SYMBOLS <lit_output> TYPE ANY TABLE.
-
-    CASE iv_field_name.
+  METHOD ovs_handle_phase_2.
+    " Field OVS logic. The generic wrapper in ZCL_MDG_ID_UIBB_FEEDER
+    " falls back to an empty table and calls SET_OUTPUT_TABLE.
+    CASE pfd_i_field_name.
       WHEN zif_mdg_id_constants=>c_attributes-profit_center.
         me->ovs_output_profit_center(
           EXPORTING
-            pfd_i_field_name      = iv_field_name
-            prd_i_query_parameter = io_ovs_callback->query_parameters
+            pfd_i_field_name      = pfd_i_field_name
+            prd_i_query_parameter = pri_i_ovs_callback->query_parameters
           IMPORTING
-            prd_e_output          = lrd_data ).
+            prd_e_output          = prd_r_output ).
 
       WHEN zif_mdg_id_constants=>c_attributes-func_cts.
         me->ovs_output_cts_sub_func(
           EXPORTING
-            pfd_i_field_name      = iv_field_name
-            prd_i_query_parameter = io_ovs_callback->query_parameters
+            pfd_i_field_name      = pfd_i_field_name
+            prd_i_query_parameter = pri_i_ovs_callback->query_parameters
           IMPORTING
-            prd_e_output          = lrd_data ).
+            prd_e_output          = prd_r_output ).
     ENDCASE.
-
-    IF lrd_data IS NOT BOUND.
-      CREATE DATA lrd_data TYPE crmt_text_value_pair_tab.
-    ENDIF.
-
-    ASSIGN lrd_data->* TO <lit_output>.
-    IF <lit_output> IS ASSIGNED.
-      io_ovs_callback->set_output_table( output = <lit_output> ).
-    ENDIF.
   ENDMETHOD.
 
 

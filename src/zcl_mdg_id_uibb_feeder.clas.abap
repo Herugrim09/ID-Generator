@@ -52,6 +52,17 @@ CLASS zcl_mdg_id_uibb_feeder DEFINITION
         !pfd_i_query_component TYPE name_komp
       RETURNING
         VALUE(pfd_r_alpha)     TYPE i .
+    "! Field-specific OVS output for phase 2. IF_FPM_GUIBB_OVS~HANDLE_PHASE_2
+    "! calls this generically, then falls back to an empty
+    "! CRMT_TEXT_VALUE_PAIR_TAB and calls SET_OUTPUT_TABLE. Redefine this
+    "! in the concrete feeder to build the value help per PFD_I_FIELD_NAME
+    "! (including any query filtering).
+    METHODS ovs_handle_phase_2
+      IMPORTING
+        !pfd_i_field_name   TYPE name_komp
+        !pri_i_ovs_callback TYPE REF TO if_wd_ovs
+      RETURNING
+        VALUE(prd_r_output) TYPE REF TO data .
     METHODS ovs_handle_phase_3
       IMPORTING
         !pfd_i_field_name  TYPE name_komp
@@ -185,7 +196,28 @@ CLASS zcl_mdg_id_uibb_feeder IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD if_fpm_guibb_ovs~handle_phase_2 ##NEEDED.
+  METHOD if_fpm_guibb_ovs~handle_phase_2.
+    " Generic wrapper: the concrete feeder fills PRD_R_OUTPUT via the
+    " redefinable OVS_HANDLE_PHASE_2; here we just hand it to the OVS.
+    FIELD-SYMBOLS <lit_output> TYPE ANY TABLE.
+
+    DATA(lrd_output) = me->ovs_handle_phase_2(
+                         pfd_i_field_name   = iv_field_name
+                         pri_i_ovs_callback = io_ovs_callback ).
+
+    IF lrd_output IS NOT BOUND.
+      CREATE DATA lrd_output TYPE crmt_text_value_pair_tab.
+    ENDIF.
+
+    ASSIGN lrd_output->* TO <lit_output>.
+    IF <lit_output> IS ASSIGNED.
+      io_ovs_callback->set_output_table( output = <lit_output> ).
+    ENDIF.
+  ENDMETHOD.
+
+
+  METHOD ovs_handle_phase_2 ##NEEDED.
+    " Default: no value help. Redefined by the concrete feeder.
   ENDMETHOD.
 
 

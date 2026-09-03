@@ -13,7 +13,7 @@ CLASS zcl_mdg_sg_acc_id_a_gen DEFINITION
   PUBLIC SECTION.
     METHODS if_fpm_guibb~initialize REDEFINITION .
     METHODS if_fpm_guibb_form~get_definition REDEFINITION .
-    METHODS if_fpm_guibb_ovs~handle_phase_2 REDEFINITION .
+    METHODS ovs_handle_phase_2 REDEFINITION .
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -73,25 +73,19 @@ CLASS zcl_mdg_sg_acc_id_a_gen IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD if_fpm_guibb_ovs~handle_phase_2.
-    FIELD-SYMBOLS <lit_output> TYPE ANY TABLE.
+  METHOD ovs_handle_phase_2.
+    " Build the value help for the field, then filter it by the user's
+    " query. The generic wrapper in ZCL_MDG_ID_UIBB_FEEDER hands the
+    " result to the OVS.
+    prd_r_output = build_ovs_table( pfd_i_field_name ).
 
-    DATA(lrd_output) = build_ovs_table( iv_field_name ).
-
-    IF lrd_output IS NOT BOUND.
-      CREATE DATA lrd_output TYPE crmt_text_value_pair_tab.
-    ENDIF.
-
-    ASSIGN lrd_output->* TO <lit_output>.
-    IF <lit_output> IS ASSIGNED.
+    IF prd_r_output IS BOUND.
       me->ovs_output_filter(
         EXPORTING
-          pfd_i_field_name      = iv_field_name
-          prd_i_query_parameter = io_ovs_callback->query_parameters
+          pfd_i_field_name      = pfd_i_field_name
+          prd_i_query_parameter = pri_i_ovs_callback->query_parameters
         CHANGING
-          prd_c_output          = lrd_output ).
-      ASSIGN lrd_output->* TO <lit_output>.
-      io_ovs_callback->set_output_table( output = <lit_output> ).
+          prd_c_output          = prd_r_output ).
     ENDIF.
   ENDMETHOD.
 

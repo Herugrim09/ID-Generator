@@ -11,7 +11,7 @@ under `src/`.
 | `ZIF_MDG_ID_NUMBER_GEN` | Number generator interface (`GENERATE_NUMBER`, `SPLIT_NUMBER`) |
 | `ZCL_MDG_ID_NUMGEN_BASE` | Template-method base class: buffers the input structure, resolves the MDG staging table, reads existing IDs (`QUERYING_DB`), structure validation |
 | `ZCL_MDG_ID_NUMGEN_FACTORY` | Maps `(entity, project code)` to the concrete generator class / structure |
-| `ZCL_MDG_ID_UIBB_FEEDER` | Generic FPM GUIBB form feeder; on `ZATTR_SELECTED` calls the factory and writes the ID into event key `GENERATED_ID` |
+| `ZCL_MDG_ID_UIBB_FEEDER` | Generic FPM GUIBB form feeder; on `ZATTR_SELECTED` calls the factory and writes the ID into event key `GENERATED_ID`. `IF_FPM_GUIBB_OVS~HANDLE_PHASE_2` is generic (fallback + `SET_OUTPUT_TABLE`); concrete feeders redefine the protected `OVS_HANDLE_PHASE_2` to return the value-help table per field. |
 | `ZIF_MDG_ID_CONSTANTS` | Central constants (project codes, attribute names, fixed values) |
 | `ZCL_MDG_ID_SG_UTIL` | Company code ↔ plant assignment (buffered stub) |
 | `ZCL_MDG_CCTR_RULES` | Rule type container (`TT_FUNC`) |
