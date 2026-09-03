@@ -13,7 +13,6 @@ CLASS zcl_mdg_sg_acc_id_a_gen DEFINITION
   PUBLIC SECTION.
     METHODS if_fpm_guibb~initialize REDEFINITION .
     METHODS if_fpm_guibb_form~get_definition REDEFINITION .
-    METHODS if_fpm_guibb_form~get_data REDEFINITION .
 
   PROTECTED SECTION.
     METHODS ovs_handle_phase_2 REDEFINITION .
@@ -49,48 +48,6 @@ CLASS zcl_mdg_sg_acc_id_a_gen IMPLEMENTATION.
         iv_instance_id    = iv_instance_id.
 
     me->fd_project_name = lc_proj_sgre.
-  ENDMETHOD.
-
-
-  METHOD if_fpm_guibb_form~get_data.
-    " PAYMENT_METHOD only feeds position 8 for Interim Out (485) and
-    " Interim IHB (488); for Main / IHB / Interim In it is fixed
-    " (0 / 0 / 1). Hide the field unless the chosen group needs it.
-    CALL METHOD super->if_fpm_guibb_form~get_data
-      EXPORTING
-        io_event                = io_event
-        iv_raised_by_own_ui     = iv_raised_by_own_ui
-        it_selected_fields      = it_selected_fields
-        iv_edit_mode            = iv_edit_mode
-        io_extended_ctrl        = io_extended_ctrl
-      IMPORTING
-        et_messages             = et_messages
-        ev_data_changed         = ev_data_changed
-        ev_field_usage_changed  = ev_field_usage_changed
-        ev_action_usage_changed = ev_action_usage_changed
-      CHANGING
-        cs_data                 = cs_data
-        ct_field_usage          = ct_field_usage
-        ct_action_usage         = ct_action_usage.
-
-    DATA lv_kind TYPE ze_mdg_acct_group_kind.
-    ASSIGN COMPONENT lc_account_group OF STRUCTURE cs_data TO FIELD-SYMBOL(<lv_kind>).
-    IF <lv_kind> IS ASSIGNED.
-      lv_kind = <lv_kind>.
-    ENDIF.
-
-    DATA(lv_visibility) = COND #(
-      WHEN lv_kind = zcl_mdg_sg_acct_rules=>c_kind-int_out
-        OR lv_kind = zcl_mdg_sg_acct_rules=>c_kind-ihb_int
-      THEN if_fpm_constants=>gc_visibility-visible
-      ELSE if_fpm_constants=>gc_visibility-not_visible ).
-
-    LOOP AT ct_field_usage ASSIGNING FIELD-SYMBOL(<lwa_fu>)
-         WHERE name = lc_payment_meth
-            OR name = lc_payment_meth && cl_usmd_generic_genil_text=>gv_text_suffix.
-      <lwa_fu>-visibility = lv_visibility.
-    ENDLOOP.
-    ev_field_usage_changed = abap_true.
   ENDMETHOD.
 
 

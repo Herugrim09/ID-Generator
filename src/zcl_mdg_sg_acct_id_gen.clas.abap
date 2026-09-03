@@ -26,7 +26,7 @@ CLASS zcl_mdg_sg_acct_id_gen DEFINITION
   PRIVATE SECTION.
 
     CONSTANTS:
-      lc_comp_code     TYPE name_komp VALUE 'COMP_CODE' ##NEEDED,
+      lc_comp_code     TYPE name_komp VALUE 'COMP_CODE',
       lc_bank_code     TYPE name_komp VALUE 'BANK_CODE',
       lc_currency      TYPE name_komp VALUE 'CURRENCY',
       lc_account_group TYPE name_komp VALUE 'ACCOUNT_GROUP',
@@ -55,12 +55,15 @@ CLASS zcl_mdg_sg_acct_id_gen IMPLEMENTATION.
     " Same first step as CL_P40_MDG_SE_PCTR_ID_GEN=>GENERATE_NUMBER.
     me->was_field_changed( pwa_i_structure ).
 
+    DATA(lv_comp) = CONV bukrs( to_upper( read_char( lc_comp_code ) ) ).
     DATA(lv_kind) = CONV ze_mdg_acct_group_kind( to_upper( read_char( lc_account_group ) ) ).
     DATA(lv_iso)  = CONV waers( to_upper( read_char( lc_currency ) ) ).
     DATA(lv_bank) = CONV ze_mdg_bank_code( to_upper( read_char( lc_bank_code ) ) ).
     DATA(lv_pm)   = CONV ze_mdg_payment_method( to_upper( read_char( lc_payment_meth ) ) ).
 
-    IF lv_kind IS INITIAL OR lv_iso IS INITIAL OR lv_bank IS INITIAL.
+    " Every field of the structure must be filled before an ID is built.
+    IF lv_comp IS INITIAL OR lv_kind IS INITIAL OR lv_iso IS INITIAL
+       OR lv_bank IS INITIAL OR lv_pm IS INITIAL.
       RETURN.
     ENDIF.
 

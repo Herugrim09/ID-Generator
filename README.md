@@ -69,7 +69,8 @@ No BAdI needed – the write-back is a `PROCESS_EVENT` redefinition on the stand
 * Position 1-3 – group: `288` Main / `484` Interim In / `485` Interim Out / `253` IHB / `488` Interim IHB.
 * Position 4-5 – bank code: the 2-char code of the exact bank row the user picked in the OVS. Each `(Bank account# N)` variant is its own row with its own code (`Deutsche Bank` = `03`, `Deutsche Bank (Bank account# 2)` = `33`, `… # 3` = `3A`, `… # 4` = `3B`). The "use a different code when the bank + currency already exists" rule (concept slide 6) is a manual selection by the user – not derived.
 * Position 6-7 – currency code: 2-char code per ISO currency.
-* Position 8 – planning digit: Main → `0`, Interim In → `1`, Interim Out → per payment method (`T/U/Y/Z/M/2 → 3`, `A/B/W/X → 6`, `C/H/G → 1`, `D → 2`, `N → 4`, `X-Tax → 5`, `O → 8`, `F → 9`).
+* Position 8 – planning digit: Main → `0`, IHB → `0`, Interim In → `1`; Interim Out / Interim IHB → per payment method (`T/U/Y/Z/M/2 → 3`, `A/B/W/X → 6`, `C/H/G → 1`, `D → 2`, `N → 4`, `X-Tax → 5`, `O → 8`, `F → 9`).
+* `GENERATE_NUMBER` only builds an ID when **all five** structure fields are filled (`COMP_CODE`, `ACCOUNT_GROUP`, `BANK_CODE`, `CURRENCY`, `PAYMENT_METHOD`); otherwise it returns nothing.
 
 **Confirmed against concept slides 5 & 8**
 
