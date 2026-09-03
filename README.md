@@ -63,9 +63,12 @@ Implements the *SE Bank GL Account Concept (AGORA / WP Treasury)* /
 * Position 6-7 – currency code: 2-char code per ISO currency.
 * Position 8 – planning digit: Main → `0`, Interim In → `1`, Interim Out → per payment method (`T/U/Y/Z/M/2 → 3`, `A/B/W/X → 6`, `C/H/G → 1`, `D → 2`, `N → 4`, `X-Tax → 5`, `O → 8`, `F → 9`).
 
-**Open / assumed (pending slide 5 / 8 / 9 / 11 screenshots)**
+**Confirmed against concept slides 5 & 8**
 
-* Position 8 for `253` (IHB main) assumed `0`; for `488` (Interim IHB) assumed to reuse the `485` payment-method table.
+* `253` (IHB main) → position 8 `0` (slide 5 example `25399060`).
+* `488` (Interim IHB) → position 8 from the same payment-method table as `485` (slide 5 example `48899063` → digit `3`).
 * Payment method `X` appears twice in the source (digit 6 SFS-netting, digit 5 Tax) – first row wins.
+
+**Out of scope:** the cash-management planning levels (`F0` / `01`–`06`, concept slides 9–11) are a separate topic, not part of the GL account.
 
 `ZCL_MDG_ID_NUMGEN_FACTORY` routes `(ACCOUNT, SGRE)` → `ZCL_MDG_SG_ACCT_ID_GEN` / `ZMDG_S_SG_ACCT_NAMING`.

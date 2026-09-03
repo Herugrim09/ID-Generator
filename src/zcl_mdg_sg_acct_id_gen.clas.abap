@@ -4,6 +4,8 @@
 "!
 "! GL account (10 char, SAKNR) is fully deterministic:
 "!   '00' + group(1-3) + bank code(4-5) + currency code(6-7) + planning digit(8)
+"! e.g. 28805980 = 288 (Main) + 05 (BNP Paribas) + 98 (EUR) + 0
+"!      48899063 = 488 (Interim IHB) + 99 (IHB) + 06 (DKK) + 3
 "! Uniqueness of the result is enforced by MDG itself - this class does
 "! not re-check the generated ID. The only DB read is the bank-code
 "! sequence rule (see DETERMINE_BANK_CODE).

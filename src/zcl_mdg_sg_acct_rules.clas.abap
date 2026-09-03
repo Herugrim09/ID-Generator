@@ -545,9 +545,12 @@ CLASS zcl_mdg_sg_acct_rules IMPLEMENTATION.
 
 
   METHOD get_planning_levels.
-    " pos 8 <- payment method (Interim Out). Source: xlsx "Last digit of
-    " GL_pos_8". Note: payment method 'X' appears twice in the source
-    " (digit 6 = SFS netting, digit 5 = tax) - first row wins here.
+    " pos 8 <- payment method (Interim Out / Interim IHB). Source: concept
+    " slide 8 "Last digit of Bank GL account". Note: payment method 'X'
+    " appears twice in the source (digit 6 = SFS netting, digit 5 = tax)
+    " - first row wins here.
+    " Out of scope: the cash-management planning levels (F0 / 01..06) on
+    " concept slides 9-11 are a separate topic, not part of the GL account.
     rt_plvl = VALUE #(
       ( pmethod = 'A' digit = '6' level = 'B6' descr = 'Clearing - Treasury Payments' )
       ( pmethod = 'B' digit = '6' level = 'B6' descr = 'Clearing - Treasury Payments' )
@@ -617,16 +620,17 @@ CLASS zcl_mdg_sg_acct_rules IMPLEMENTATION.
       WHEN c_kind-int_in.
         rv_digit = '1'.
       WHEN c_kind-ihb.
-        " TODO(spec): pos 8 for group 253 (IHB main) not stated in the
-        " concept - assumed 0 like the external main bank. Confirm.
+        " Confirmed by concept slide 5 example 25399060
+        " (253 + 99 + 06 + 0): IHB main behaves like the external main bank.
         rv_digit = '0'.
       WHEN c_kind-int_out OR c_kind-ihb_int.
+        " Confirmed by concept slide 5 example 48899063
+        " (488 + 99 + 06 + 3): IHB interim uses the same position-8
+        " payment-method table as the external Interim Out (485).
         LOOP AT get_planning_levels( ) INTO DATA(ls) WHERE pmethod = iv_payment_method.
           rv_digit = ls-digit.
           EXIT.
         ENDLOOP.
-        " TODO(spec): IHB_INT (488) digit mapping assumed identical to
-        " the external Interim Out (485) table. Confirm.
     ENDCASE.
   ENDMETHOD.
 
