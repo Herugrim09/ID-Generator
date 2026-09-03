@@ -8,10 +8,11 @@
 "! e.g. 28805980 = 288 (Main) + 05 (BNP Paribas) + 98 (EUR) + 0
 "!      48899063 = 488 (Interim IHB) + 99 (IHB) + 06 (DKK) + 3
 "!
-"! The bank code (position 4-5) is whatever the user picked in the OVS -
-"! every "(Bank account# N)" entry is its own row with its own code, so
-"! the "use the next code" rule from concept slide 6 is a manual choice
-"! by the user, not derived here.
+"! Positions 4-5: the user picks a BANK NAME in the OVS (field BANK); the
+"! stored value is that bank's 2-char "Code for Bank". Every
+"! "(Bank account# N)" entry is its own row with its own code, so the
+"! "use the next code when bank + currency clash" rule from concept
+"! slide 6 is a manual choice by the user, not derived here.
 CLASS zcl_mdg_sg_acct_id_gen DEFINITION
   PUBLIC
   INHERITING FROM zcl_mdg_id_numgen_base
@@ -27,7 +28,7 @@ CLASS zcl_mdg_sg_acct_id_gen DEFINITION
 
     CONSTANTS:
       lc_comp_code     TYPE name_komp VALUE 'COMP_CODE',
-      lc_bank_code     TYPE name_komp VALUE 'BANK_CODE',
+      lc_bank          TYPE name_komp VALUE 'BANK',
       lc_currency      TYPE name_komp VALUE 'CURRENCY',
       lc_account_group TYPE name_komp VALUE 'ACCOUNT_GROUP',
       lc_payment_meth  TYPE name_komp VALUE 'PAYMENT_METHOD'.
@@ -58,7 +59,7 @@ CLASS zcl_mdg_sg_acct_id_gen IMPLEMENTATION.
     DATA(lv_comp) = CONV bukrs( to_upper( read_char( lc_comp_code ) ) ).
     DATA(lv_kind) = CONV ze_mdg_acct_group_kind( to_upper( read_char( lc_account_group ) ) ).
     DATA(lv_iso)  = CONV waers( to_upper( read_char( lc_currency ) ) ).
-    DATA(lv_bank) = CONV ze_mdg_bank_code( to_upper( read_char( lc_bank_code ) ) ).
+    DATA(lv_bank) = CONV ze_mdg_bank_code( to_upper( read_char( lc_bank ) ) ).
     DATA(lv_pm)   = CONV ze_mdg_payment_method( to_upper( read_char( lc_payment_meth ) ) ).
 
     " Every field of the structure must be filled before an ID is built.
@@ -137,7 +138,7 @@ CLASS zcl_mdg_sg_acct_id_gen IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    ASSIGN COMPONENT lc_bank_code OF STRUCTURE <lwa_out> TO FIELD-SYMBOL(<lfd_f>).
+    ASSIGN COMPONENT lc_bank OF STRUCTURE <lwa_out> TO FIELD-SYMBOL(<lfd_f>).
     IF <lfd_f> IS ASSIGNED.
       <lfd_f> = lv_bank.
     ENDIF.
