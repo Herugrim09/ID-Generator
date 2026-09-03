@@ -52,7 +52,7 @@ Implements the *SE Bank GL Account Concept (AGORA / WP Treasury)* /
 | `ZCL_MDG_SG_ACCT_RULES` | Hard-coded lookup tables from the calculator workbook: `GET_BANK_CODES` (201, incl. every "(Bank account# N)" row), `GET_CURRENCY_CODES` (93), `GET_ACCOUNT_GROUPS` (5), `GET_PLANNING_LEVELS` (18). |
 | `ZCL_MDG_0G_ACC_ID_A_GEN` | ACCOUNT entity feeder base (`FD_ENTITY = ACCOUNT`). |
 | `ZCL_MDG_SG_ACC_ID_A_GEN` | ACCOUNT / SGRE feeder (inherits `ZCL_MDG_0G_ACC_ID_A_GEN`, `FD_PROJECT_NAME = 'SGRE'`); OVS value helps for account group / bank / currency / payment method. Used as the `FPM_FORM_UIBB` feeder class. |
-| `ZMDG_S_SG_ACCT_NAMING` | UIBB structure: `COMP_CODE`, `ACCOUNT_GROUP`, `BANK_CODE`, `CURRENCY`, `PAYMENT_METHOD`. |
+| `ZMDG_S_SG_ACCT_NAMING` | UIBB structure: `ACCOUNT_GROUP`, `BANK_CODE`, `CURRENCY`, `PAYMENT_METHOD`. |
 | `ZE_MDG_BANK_CODE` … `ZE_MDG_PAYMENT_METHOD` | 9 data elements. |
 | `ZCL_MDG_FEED_ACC_BASE` | Detail-form feeder base: inherits the standard MDG-F ACCOUNT feeder (`CL_MDGF_GUIBB_FI_ACCOUNT`), redefines `PROCESS_EVENT` to take `GENERATED_ID` off the `ZATTR_SELECTED` event and `MO_ENTITY->SET_PROPERTY( ACCOUNT )`. Mirrors `/S4E/CL_P40_MDG_FEED_CCTR_BASE`. |
 | `ZCL_MDG_FEED_ACC_SG` | Project (SGRE) detail feeder; the class the ACCOUNT detail UIBB config points at. Currently just inherits the write-back; grow it for field-property / OVS control like `/S4E/CL_P40_MDG_FEED_CCTR_SG`. |
@@ -70,7 +70,7 @@ No BAdI needed – the write-back is a `PROCESS_EVENT` redefinition on the stand
 * Position 4-5 – bank: the user picks a **bank name** in the `BANK_CODE` field OVS (concept slide 6 – "Bank name" dropdown); the stored value is that bank's 2-char "Code for Bank". Each `(Bank account# N)` variant is its own row with its own code (`Deutsche Bank` = `03`, `Deutsche Bank (Bank account# 2)` = `33`, `… # 3` = `3A`, `… # 4` = `3B`). The "use a different code when bank + currency already exists" rule is a manual choice by the user – not derived.
 * Position 6-7 – currency code: 2-char code per ISO currency.
 * Position 8 – planning digit: Main → `0`, IHB → `0`, Interim In → `1`; Interim Out / Interim IHB → per payment method (`T/U/Y/Z/M/2 → 3`, `A/B/W/X → 6`, `C/H/G → 1`, `D → 2`, `N → 4`, `X-Tax → 5`, `O → 8`, `F → 9`).
-* `GENERATE_NUMBER` only builds an ID when **all five** structure fields are filled (`COMP_CODE`, `ACCOUNT_GROUP`, `BANK_CODE`, `CURRENCY`, `PAYMENT_METHOD`); otherwise it returns nothing.
+* `GENERATE_NUMBER` only builds an ID when **all four** structure fields are filled (`ACCOUNT_GROUP`, `BANK_CODE`, `CURRENCY`, `PAYMENT_METHOD`); otherwise it returns nothing.
 
 **Confirmed against concept slides 5 & 8**
 
