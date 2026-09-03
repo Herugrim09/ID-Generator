@@ -20,7 +20,7 @@ CLASS zcl_mdg_sg_acc_id_a_gen DEFINITION
   PRIVATE SECTION.
 
     CONSTANTS:
-      lc_bank          TYPE name_komp VALUE 'BANK',
+      lc_bank_code     TYPE name_komp VALUE 'BANK_CODE',
       lc_currency      TYPE name_komp VALUE 'CURRENCY',
       lc_account_group TYPE name_komp VALUE 'ACCOUNT_GROUP',
       lc_payment_meth  TYPE name_komp VALUE 'PAYMENT_METHOD'.
@@ -74,7 +74,7 @@ CLASS zcl_mdg_sg_acc_id_a_gen IMPLEMENTATION.
 
     LOOP AT et_field_description ASSIGNING FIELD-SYMBOL(<lwa_fd>)
          WHERE name = lc_account_group
-            OR name = lc_bank
+            OR name = lc_bank_code
             OR name = lc_currency
             OR name = lc_payment_meth.
       <lwa_fd>-ovs_name = lfd_ovs_name.
@@ -103,7 +103,7 @@ CLASS zcl_mdg_sg_acc_id_a_gen IMPLEMENTATION.
     DATA lit_out TYPE usmdz10_ts_ovs_output.
 
     CASE iv_field_name.
-      WHEN lc_bank.
+      WHEN lc_bank_code.
         " concept slide 6: the user picks a BANK NAME (incl. the
         " "(Bank account# N)" variants); its 2-char "Code for Bank"
         " (03 / 33 / 3A / 3B ...) is what lands in positions 4-5.

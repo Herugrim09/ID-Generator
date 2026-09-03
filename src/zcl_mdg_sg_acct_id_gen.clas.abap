@@ -28,7 +28,7 @@ CLASS zcl_mdg_sg_acct_id_gen DEFINITION
 
     CONSTANTS:
       lc_comp_code     TYPE name_komp VALUE 'COMP_CODE',
-      lc_bank          TYPE name_komp VALUE 'BANK',
+      lc_bank_code     TYPE name_komp VALUE 'BANK_CODE',
       lc_currency      TYPE name_komp VALUE 'CURRENCY',
       lc_account_group TYPE name_komp VALUE 'ACCOUNT_GROUP',
       lc_payment_meth  TYPE name_komp VALUE 'PAYMENT_METHOD'.
@@ -59,7 +59,7 @@ CLASS zcl_mdg_sg_acct_id_gen IMPLEMENTATION.
     DATA(lv_comp) = CONV bukrs( to_upper( read_char( lc_comp_code ) ) ).
     DATA(lv_kind) = CONV ze_mdg_acct_group_kind( to_upper( read_char( lc_account_group ) ) ).
     DATA(lv_iso)  = CONV waers( to_upper( read_char( lc_currency ) ) ).
-    DATA(lv_bank) = CONV ze_mdg_bank_code( to_upper( read_char( lc_bank ) ) ).
+    DATA(lv_bank) = CONV ze_mdg_bank_code( to_upper( read_char( lc_bank_code ) ) ).
     DATA(lv_pm)   = CONV ze_mdg_payment_method( to_upper( read_char( lc_payment_meth ) ) ).
 
     " Every field of the structure must be filled before an ID is built.
@@ -138,7 +138,7 @@ CLASS zcl_mdg_sg_acct_id_gen IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    ASSIGN COMPONENT lc_bank OF STRUCTURE <lwa_out> TO FIELD-SYMBOL(<lfd_f>).
+    ASSIGN COMPONENT lc_bank_code OF STRUCTURE <lwa_out> TO FIELD-SYMBOL(<lfd_f>).
     IF <lfd_f> IS ASSIGNED.
       <lfd_f> = lv_bank.
     ENDIF.
