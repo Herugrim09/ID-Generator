@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_MDG_SGRE_ACC_ID_A_GEN</CLSNAME>
+    <CLSNAME>ZCL_MDG_SG_ACC_ID_A_GEN</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>MDG ID Generator - Account Rule (Entity Base)</DESCRIPT>
+    <DESCRIPT>MDG ID Generator - SGRE Account Naming UIBB</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

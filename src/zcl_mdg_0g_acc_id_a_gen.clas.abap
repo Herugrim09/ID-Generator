@@ -2,7 +2,7 @@
 "! Entity layer on top of the generic feeder: fixes the entity to
 "! ACCOUNT. Project-specific account feeders inherit from this class.
 "! Mirrors ZCL_MDG_CCTRID_RULE for the cost center entity.
-CLASS zcl_mdg_sgre_acc_id_a_gen DEFINITION
+CLASS zcl_mdg_0g_acc_id_a_gen DEFINITION
   PUBLIC
   INHERITING FROM zcl_mdg_id_uibb_feeder
   CREATE PUBLIC.
@@ -18,7 +18,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_mdg_sgre_acc_id_a_gen IMPLEMENTATION.
+CLASS zcl_mdg_0g_acc_id_a_gen IMPLEMENTATION.
 
 
   METHOD if_fpm_guibb~initialize.

@@ -4,9 +4,9 @@
 "! ZCL_MDG_SG_ACCT_ID_GEN, and provides the OVS value helps for the
 "! account group, bank, currency and payment method fields from the
 "! hard-coded rule tables (ZCL_MDG_SG_ACCT_RULES).
-CLASS zcl_mdg_sg_acctid_rule DEFINITION
+CLASS zcl_mdg_sg_acc_id_a_gen DEFINITION
   PUBLIC
-  INHERITING FROM zcl_mdg_sgre_acc_id_a_gen
+  INHERITING FROM zcl_mdg_0g_acc_id_a_gen
   FINAL
   CREATE PUBLIC.
 
@@ -32,7 +32,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_mdg_sg_acctid_rule IMPLEMENTATION.
+CLASS zcl_mdg_sg_acc_id_a_gen IMPLEMENTATION.
 
 
   METHOD if_fpm_guibb~initialize.
