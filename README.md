@@ -52,8 +52,17 @@ Implements the *SE Bank GL Account Concept (AGORA / WP Treasury)* /
 | `ZCL_MDG_SG_ACCT_RULES` | Hard-coded lookup tables from the calculator workbook: `GET_BANK_CODES` (201, incl. every "(Bank account# N)" row), `GET_CURRENCY_CODES` (93), `GET_ACCOUNT_GROUPS` (5), `GET_PLANNING_LEVELS` (18). |
 | `ZCL_MDG_0G_ACC_ID_A_GEN` | ACCOUNT entity feeder base (`FD_ENTITY = ACCOUNT`). |
 | `ZCL_MDG_SG_ACC_ID_A_GEN` | ACCOUNT / SGRE feeder (inherits `ZCL_MDG_0G_ACC_ID_A_GEN`, `FD_PROJECT_NAME = 'SGRE'`); OVS value helps for account group / bank / currency / payment method. Used as the `FPM_FORM_UIBB` feeder class. |
-| `ZMDG_S_SG_ACCT_NAMING` | UIBB structure: `ARE`, `ACCOUNT_GROUP`, `BANK_CODE`, `CURRENCY`, `PAYMENT_METHOD`. |
+| `ZMDG_S_SG_ACCT_NAMING` | UIBB structure: `COMP_CODE`, `ACCOUNT_GROUP`, `BANK_CODE`, `CURRENCY`, `PAYMENT_METHOD`. |
 | `ZE_MDG_BANK_CODE` … `ZE_MDG_PAYMENT_METHOD` | 9 data elements. |
+| `ZCL_MDG_FEED_ACC_BASE` | Detail-form feeder base: inherits the standard MDG-F ACCOUNT feeder (`CL_MDGF_GUIBB_ACCOUNT`), redefines `PROCESS_EVENT` to take `GENERATED_ID` off the `ZATTR_SELECTED` event and `MO_ENTITY->SET_PROPERTY( ACCOUNT )`. Mirrors `/S4E/CL_P40_MDG_FEED_CCTR_BASE`. |
+| `ZCL_MDG_FEED_ACC_SG` | Project (SGRE) detail feeder; the class the ACCOUNT detail UIBB config points at. Currently just inherits the write-back; grow it for field-property / OVS control like `/S4E/CL_P40_MDG_FEED_CCTR_SG`. |
+
+### How the two UIBBs connect
+
+1. **ID generator UIBB** (`FPM_FORM_UIBB`, feeder `ZCL_MDG_SG_ACC_ID_A_GEN`, structure `ZMDG_S_SG_ACCT_NAMING`) – user picks the values, presses the button that raises `ZATTR_SELECTED`; `ON_ZATTR_SELECTED` puts the generated GL account into FPM event key `GENERATED_ID`.
+2. **ACCOUNT detail UIBB** (standard MDG-F form, feeder swapped to `ZCL_MDG_FEED_ACC_SG`) – its `PROCESS_EVENT` sees `ZATTR_SELECTED`, reads `GENERATED_ID` and writes it into the `ACCOUNT` key via `MO_ENTITY->SET_PROPERTY`.
+
+No BAdI needed – the write-back is a `PROCESS_EVENT` redefinition on the standard feeder, exactly like the S4E cost centre solution.
 
 **Rules**
 
