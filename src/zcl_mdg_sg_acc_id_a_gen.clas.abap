@@ -51,6 +51,15 @@ CLASS zcl_mdg_sg_acc_id_a_gen IMPLEMENTATION.
 
 
   METHOD if_fpm_guibb_form~get_definition.
+    " Same ovs_name (this feeder's class name) for every value-help field
+    " so FPM uses one OVS usage for the feeder and OVS_HANDLE_PHASE_2
+    " branches on the field name. Unique across the floorplan, unlike the
+    " bare field name.
+    DATA(lfd_ovs_name) = CONV name_komp(
+      replace( val  = cl_abap_classdescr=>get_class_name( me )
+               sub  = '\CLASS='
+               with = '' ) ).
+
     CALL METHOD super->if_fpm_guibb_form~get_definition
       IMPORTING
         eo_field_catalog         = eo_field_catalog
@@ -62,13 +71,12 @@ CLASS zcl_mdg_sg_acc_id_a_gen IMPLEMENTATION.
         es_message               = es_message
         ev_additional_error_info = ev_additional_error_info.
 
-    " Enable the OVS on the fields that have a hard-coded value help.
     LOOP AT et_field_description ASSIGNING FIELD-SYMBOL(<lwa_fd>)
          WHERE name = lc_account_group
             OR name = lc_bank_code
             OR name = lc_currency
             OR name = lc_payment_meth.
-      <lwa_fd>-ovs_name = <lwa_fd>-name.
+      <lwa_fd>-ovs_name = lfd_ovs_name.
     ENDLOOP.
   ENDMETHOD.
 
