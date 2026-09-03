@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>ZMDG_S_SG_ACCT_NAMING</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>INTTAB</TABCLASS>
+    <DDTEXT>MDG ID Gen: SGRE Account Naming Convention (draft)</DDTEXT>
+    <EXCLASS>1</EXCLASS>
+   </DD02V>
+   <DD03P_TABLE>
+    <DD03P>
+     <FIELDNAME>CHART_OF_ACCTS</FIELDNAME>
+     <ROLLNAME>KTOPL</ROLLNAME>
+     <POSITION>0001</POSITION>
+     <COMPTYPE>E</COMPTYPE>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>ACCOUNT_GROUP</FIELDNAME>
+     <ROLLNAME>KTOKS</ROLLNAME>
+     <POSITION>0002</POSITION>
+     <COMPTYPE>E</COMPTYPE>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>GL_ACCOUNT</FIELDNAME>
+     <ROLLNAME>USMD_VALUE</ROLLNAME>
+     <POSITION>0003</POSITION>
+     <COMPTYPE>E</COMPTYPE>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>
