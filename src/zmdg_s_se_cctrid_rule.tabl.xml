@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TABL" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DD02V>
+    <TABNAME>ZMDG_S_SE_CCTRID_RULE</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
+    <TABCLASS>INTTAB</TABCLASS>
+    <DDTEXT>MDG ID Gen: SE Cost Center Naming Convention</DDTEXT>
+    <EXCLASS>1</EXCLASS>
+   </DD02V>
+   <DD03P_TABLE>
+    <DD03P>
+     <FIELDNAME>PROFIT_CENTER</FIELDNAME>
+     <ROLLNAME>PRCTR</ROLLNAME>
+     <POSITION>0001</POSITION>
+     <COMPTYPE>E</COMPTYPE>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>COMPANY_CODE</FIELDNAME>
+     <ROLLNAME>ZE_MDG_PROFIT_COMPANY_CODE</ROLLNAME>
+     <POSITION>0002</POSITION>
+     <COMPTYPE>E</COMPTYPE>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>PLANT</FIELDNAME>
+     <ROLLNAME>ZE_MDG_PROFIT_PLANT</ROLLNAME>
+     <POSITION>0003</POSITION>
+     <COMPTYPE>E</COMPTYPE>
+    </DD03P>
+    <DD03P>
+     <FIELDNAME>FUNC_CTS</FIELDNAME>
+     <ROLLNAME>ZE_MDG_COST_FUNC</ROLLNAME>
+     <POSITION>0004</POSITION>
+     <COMPTYPE>E</COMPTYPE>
+    </DD03P>
+   </DD03P_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>
