@@ -21,13 +21,6 @@ CLASS zcl_mdg_sg_acct_rules DEFINITION
       END OF ty_bank,
       tt_bank TYPE SORTED TABLE OF ty_bank WITH UNIQUE KEY code.
     TYPES:
-      BEGIN OF ty_seq,
-        primary TYPE ze_mdg_bank_code,
-        seqno   TYPE i,
-        code    TYPE ze_mdg_bank_code,
-      END OF ty_seq,
-      tt_seq TYPE SORTED TABLE OF ty_seq WITH UNIQUE KEY primary seqno.
-    TYPES:
       BEGIN OF ty_ccy,
         iso     TYPE waers,
         code    TYPE ze_mdg_currency_code,
@@ -49,7 +42,6 @@ CLASS zcl_mdg_sg_acct_rules DEFINITION
         descr   TYPE text40,
       END OF ty_plvl,
       tt_plvl TYPE STANDARD TABLE OF ty_plvl WITH DEFAULT KEY.
-    TYPES tt_code TYPE STANDARD TABLE OF ze_mdg_bank_code WITH DEFAULT KEY.
 
     CONSTANTS:
       BEGIN OF c_kind,
@@ -60,17 +52,13 @@ CLASS zcl_mdg_sg_acct_rules DEFINITION
         ihb_int TYPE ze_mdg_acct_group_kind VALUE 'IHB_INT',
       END OF c_kind.
 
+    "! Bank list for the OVS value help. Every "(Bank account# N)" entry
+    "! is a separate row with its own 2-char code - the user picks the
+    "! exact one they want (the sequence is a manual choice, not derived).
     CLASS-METHODS get_bank_codes      RETURNING VALUE(rt_bank)  TYPE tt_bank.
-    CLASS-METHODS get_bank_seq        RETURNING VALUE(rt_seq)   TYPE tt_seq.
     CLASS-METHODS get_currency_codes  RETURNING VALUE(rt_ccy)   TYPE tt_ccy.
     CLASS-METHODS get_account_groups  RETURNING VALUE(rt_group) TYPE tt_group.
     CLASS-METHODS get_planning_levels RETURNING VALUE(rt_plvl)  TYPE tt_plvl.
-
-    "! Ordered bank code list for the bank that owns IV_CODE, starting at
-    "! that bank's primary (top) code. Single-code bank -> just ( IV_CODE ).
-    CLASS-METHODS get_bank_code_sequence
-      IMPORTING iv_code       TYPE ze_mdg_bank_code
-      RETURNING VALUE(rt_code) TYPE tt_code.
 
     "! 2-char currency code for an ISO currency; INITIAL if unknown.
     CLASS-METHODS currency_code
@@ -304,136 +292,6 @@ CLASS zcl_mdg_sg_acct_rules IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_bank_seq.
-    rt_seq = VALUE #(
-      ( primary = '01' seqno = 1 code = '01' )
-      ( primary = '01' seqno = 2 code = 'O1' )
-      ( primary = '01' seqno = 3 code = 'O2' )
-      ( primary = '02' seqno = 1 code = '02' )
-      ( primary = '02' seqno = 2 code = 'D2' )
-      ( primary = '03' seqno = 1 code = '03' )
-      ( primary = '03' seqno = 2 code = '33' )
-      ( primary = '03' seqno = 3 code = '3A' )
-      ( primary = '03' seqno = 4 code = '3B' )
-      ( primary = '04' seqno = 1 code = '04' )
-      ( primary = '04' seqno = 2 code = 'V1' )
-      ( primary = '04' seqno = 3 code = 'V2' )
-      ( primary = '04' seqno = 4 code = 'V3' )
-      ( primary = '05' seqno = 1 code = '05' )
-      ( primary = '05' seqno = 2 code = 'Q1' )
-      ( primary = '05' seqno = 3 code = 'Q2' )
-      ( primary = '05' seqno = 4 code = 'Q3' )
-      ( primary = '05' seqno = 5 code = 'Q4' )
-      ( primary = '06' seqno = 1 code = '06' )
-      ( primary = '06' seqno = 2 code = 'C1' )
-      ( primary = '06' seqno = 3 code = 'C2' )
-      ( primary = '06' seqno = 4 code = 'C3' )
-      ( primary = '06' seqno = 5 code = 'C4' )
-      ( primary = '06' seqno = 6 code = 'C5' )
-      ( primary = '06' seqno = 7 code = 'C6' )
-      ( primary = '06' seqno = 8 code = 'C7' )
-      ( primary = '06' seqno = 9 code = 'C8' )
-      ( primary = '08' seqno = 1 code = '08' )
-      ( primary = '08' seqno = 2 code = 'Z1' )
-      ( primary = '09' seqno = 1 code = '09' )
-      ( primary = '09' seqno = 2 code = 'U1' )
-      ( primary = '09' seqno = 3 code = 'U2' )
-      ( primary = '11' seqno = 1 code = '11' )
-      ( primary = '11' seqno = 2 code = 'H1' )
-      ( primary = '12' seqno = 1 code = '12' )
-      ( primary = '12' seqno = 2 code = 'W1' )
-      ( primary = '12' seqno = 3 code = 'W2' )
-      ( primary = '13' seqno = 1 code = '13' )
-      ( primary = '13' seqno = 2 code = 'D5' )
-      ( primary = '13' seqno = 3 code = 'D6' )
-      ( primary = '13' seqno = 4 code = 'D7' )
-      ( primary = '14' seqno = 1 code = '14' )
-      ( primary = '14' seqno = 2 code = 'G1' )
-      ( primary = '14' seqno = 3 code = 'G2' )
-      ( primary = '15' seqno = 1 code = '15' )
-      ( primary = '15' seqno = 2 code = 'N1' )
-      ( primary = '15' seqno = 3 code = 'N2' )
-      ( primary = '15' seqno = 4 code = 'N3' )
-      ( primary = '16' seqno = 1 code = '16' )
-      ( primary = '16' seqno = 2 code = 'A1' )
-      ( primary = '16' seqno = 3 code = 'A2' )
-      ( primary = '17' seqno = 1 code = '17' )
-      ( primary = '17' seqno = 2 code = 'M1' )
-      ( primary = '18' seqno = 1 code = '18' )
-      ( primary = '18' seqno = 2 code = 'X1' )
-      ( primary = '18' seqno = 3 code = 'X2' )
-      ( primary = '18' seqno = 4 code = 'X3' )
-      ( primary = '20' seqno = 1 code = '20' )
-      ( primary = '20' seqno = 2 code = 'B6' )
-      ( primary = '21' seqno = 1 code = '21' )
-      ( primary = '21' seqno = 2 code = 'R5' )
-      ( primary = '22' seqno = 1 code = '22' )
-      ( primary = '22' seqno = 2 code = 'Y1' )
-      ( primary = '22' seqno = 3 code = 'Y2' )
-      ( primary = '23' seqno = 1 code = '23' )
-      ( primary = '23' seqno = 2 code = 'S1' )
-      ( primary = '25' seqno = 1 code = '25' )
-      ( primary = '25' seqno = 2 code = 'H2' )
-      ( primary = '25' seqno = 3 code = 'H3' )
-      ( primary = '29' seqno = 1 code = '29' )
-      ( primary = '29' seqno = 2 code = 'J1' )
-      ( primary = '31' seqno = 1 code = '31' )
-      ( primary = '31' seqno = 2 code = 'P1' )
-      ( primary = '31' seqno = 3 code = 'P2' )
-      ( primary = '31' seqno = 4 code = 'P3' )
-      ( primary = '31' seqno = 5 code = 'P4' )
-      ( primary = '34' seqno = 1 code = '34' )
-      ( primary = '34' seqno = 2 code = 'B1' )
-      ( primary = '34' seqno = 3 code = 'B2' )
-      ( primary = '38' seqno = 1 code = '38' )
-      ( primary = '38' seqno = 2 code = 'L1' )
-      ( primary = '39' seqno = 1 code = '39' )
-      ( primary = '39' seqno = 2 code = 'A5' )
-      ( primary = '41' seqno = 1 code = '41' )
-      ( primary = '41' seqno = 2 code = 'T1' )
-      ( primary = '44' seqno = 1 code = '44' )
-      ( primary = '44' seqno = 2 code = 'D1' )
-      ( primary = '45' seqno = 1 code = '45' )
-      ( primary = '45' seqno = 2 code = 'E1' )
-      ( primary = '46' seqno = 1 code = '46' )
-      ( primary = '46' seqno = 2 code = 'F1' )
-      ( primary = '51' seqno = 1 code = '51' )
-      ( primary = '51' seqno = 2 code = 'K1' )
-      ( primary = '51' seqno = 3 code = 'K2' )
-      ( primary = '52' seqno = 1 code = '52' )
-      ( primary = '52' seqno = 2 code = 'J5' )
-      ( primary = '52' seqno = 3 code = 'J6' )
-      ( primary = '52' seqno = 4 code = 'J7' )
-      ( primary = '52' seqno = 5 code = 'J8' )
-      ( primary = '52' seqno = 6 code = 'J9' )
-      ( primary = '57' seqno = 1 code = '57' )
-      ( primary = '57' seqno = 2 code = 'R1' )
-      ( primary = '57' seqno = 3 code = 'R2' )
-      ( primary = '60' seqno = 1 code = '60' )
-      ( primary = '60' seqno = 2 code = 'I1' )
-      ( primary = '79' seqno = 1 code = '79' )
-      ( primary = '79' seqno = 2 code = 'Z5' )
-      ( primary = '92' seqno = 1 code = '92' )
-      ( primary = '92' seqno = 2 code = 'Z4' )
-      ( primary = '99' seqno = 1 code = '99' )
-      ( primary = '99' seqno = 2 code = '9A' )
-      ( primary = '99' seqno = 3 code = '9B' )
-      ( primary = 'F6' seqno = 1 code = 'F6' )
-      ( primary = 'F6' seqno = 2 code = 'F7' )
-      ( primary = 'T8' seqno = 1 code = 'T8' )
-      ( primary = 'T8' seqno = 2 code = 'T9' )
-      ( primary = 'W6' seqno = 1 code = 'W6' )
-      ( primary = 'W6' seqno = 2 code = 'W7' )
-      ( primary = 'M6' seqno = 1 code = 'M6' )
-      ( primary = 'M6' seqno = 2 code = 'M7' )
-      ( primary = 'M6' seqno = 3 code = 'M8' )
-      ( primary = 'G6' seqno = 1 code = 'G6' )
-      ( primary = 'G6' seqno = 2 code = 'G7' )
-      ( primary = 'G6' seqno = 3 code = 'G8' )
-    ).
-  ENDMETHOD.
-
-
   METHOD get_currency_codes.
     rt_ccy = VALUE #(
       ( iso = 'SDG' code = '10' country = 'Sudanese Pound' )
@@ -571,27 +429,6 @@ CLASS zcl_mdg_sg_acct_rules IMPLEMENTATION.
       ( pmethod = 'H' digit = '1' level = 'B1' descr = 'Outgoing - Cheque' )
       ( pmethod = 'G' digit = '1' level = 'B1' descr = 'Outgoing - Cheque' )
     ).
-  ENDMETHOD.
-
-
-  METHOD get_bank_code_sequence.
-    DATA lv_primary TYPE ze_mdg_bank_code.
-    DATA(lt_seq) = get_bank_seq( ).
-
-    LOOP AT lt_seq INTO DATA(ls) WHERE code = iv_code.
-      lv_primary = ls-primary.
-      EXIT.
-    ENDLOOP.
-
-    IF lv_primary IS INITIAL.
-      " bank has a single code
-      APPEND iv_code TO rt_code.
-      RETURN.
-    ENDIF.
-
-    LOOP AT lt_seq INTO ls WHERE primary = lv_primary.
-      APPEND ls-code TO rt_code.
-    ENDLOOP.
   ENDMETHOD.
 
 

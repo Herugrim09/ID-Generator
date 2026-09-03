@@ -101,10 +101,12 @@ CLASS zcl_mdg_sg_acctid_rule IMPLEMENTATION.
 
     CASE iv_field_name.
       WHEN lc_bank_code.
+        " every bank row - incl. the "(Bank account# N)" variants - so the
+        " user picks the exact code they want (03 / 33 / 3A / 3B ...).
         LOOP AT zcl_mdg_sg_acct_rules=>get_bank_codes( ) INTO DATA(ls_bank).
           INSERT VALUE usmdz10_s_ovs_output(
                    key  = ls_bank-code
-                   text = |{ ls_bank-code } { ls_bank-name }| ) INTO TABLE lit_out.
+                   text = |{ ls_bank-name } ({ ls_bank-code })| ) INTO TABLE lit_out.
         ENDLOOP.
 
       WHEN lc_currency.

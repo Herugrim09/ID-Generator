@@ -49,8 +49,8 @@ Implements the *SE Bank GL Account Concept (AGORA / WP Treasury)* /
 
 | Object | Role |
 |---|---|
-| `ZCL_MDG_SG_ACCT_ID_GEN` | Concrete generator. `GENERATE_NUMBER` assembles the GL account; private `DETERMINE_BANK_CODE` applies the bank-code sequence rule using the inherited `QUERYING_DB`. `SPLIT_NUMBER` decodes an existing account. |
-| `ZCL_MDG_SG_ACCT_RULES` | Hard-coded lookup tables from the calculator workbook: `GET_BANK_CODES` (201), `GET_BANK_SEQ` / `GET_BANK_CODE_SEQUENCE` (124), `GET_CURRENCY_CODES` (93), `GET_ACCOUNT_GROUPS` (5), `GET_PLANNING_LEVELS` (18). |
+| `ZCL_MDG_SG_ACCT_ID_GEN` | Concrete generator. `GENERATE_NUMBER` assembles the GL account from the four picked values – no DB read. `SPLIT_NUMBER` decodes an existing account. |
+| `ZCL_MDG_SG_ACCT_RULES` | Hard-coded lookup tables from the calculator workbook: `GET_BANK_CODES` (201, incl. every "(Bank account# N)" row), `GET_CURRENCY_CODES` (93), `GET_ACCOUNT_GROUPS` (5), `GET_PLANNING_LEVELS` (18). |
 | `ZCL_MDG_ACCTID_RULE` | ACCOUNT entity feeder base (`FD_ENTITY = ACCOUNT`). |
 | `ZCL_MDG_SG_ACCTID_RULE` | ACCOUNT / SGRE feeder (`FD_PROJECT_NAME = 'SGRE'`); OVS value helps for account group / bank / currency / payment method. |
 | `ZMDG_S_SG_ACCT_NAMING` | UIBB structure: `ARE`, `ACCOUNT_GROUP`, `BANK_CODE`, `CURRENCY`, `PAYMENT_METHOD`. |
@@ -59,7 +59,7 @@ Implements the *SE Bank GL Account Concept (AGORA / WP Treasury)* /
 **Rules**
 
 * Position 1-3 – group: `288` Main / `484` Interim In / `485` Interim Out / `253` IHB / `488` Interim IHB.
-* Position 4-5 – bank code: selected bank's 2-char code. Sequence rule (concept slide 6): if `group + code + currency` is already used, move to the next code in that bank's ordered list (`03 → 33 → 3A → 3B` …).
+* Position 4-5 – bank code: the 2-char code of the exact bank row the user picked in the OVS. Each `(Bank account# N)` variant is its own row with its own code (`Deutsche Bank` = `03`, `Deutsche Bank (Bank account# 2)` = `33`, `… # 3` = `3A`, `… # 4` = `3B`). The "use a different code when the bank + currency already exists" rule (concept slide 6) is a manual selection by the user – not derived.
 * Position 6-7 – currency code: 2-char code per ISO currency.
 * Position 8 – planning digit: Main → `0`, Interim In → `1`, Interim Out → per payment method (`T/U/Y/Z/M/2 → 3`, `A/B/W/X → 6`, `C/H/G → 1`, `D → 2`, `N → 4`, `X-Tax → 5`, `O → 8`, `F → 9`).
 
