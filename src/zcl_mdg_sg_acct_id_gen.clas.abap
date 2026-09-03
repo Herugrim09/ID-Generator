@@ -48,6 +48,13 @@ CLASS zcl_mdg_sg_acct_id_gen IMPLEMENTATION.
 
 
   METHOD zif_mdg_id_number_gen~generate_number.
+    " Sync the internal buffer (RD_MY_DATA) with the data currently on the
+    " screen. The factory caches the generator instance, so without this
+    " the fields below are read from whatever RD_MY_DATA held at
+    " CREATE OBJECT time - stale or empty on any call after the first.
+    " Same first step as CL_P40_MDG_SE_PCTR_ID_GEN=>GENERATE_NUMBER.
+    me->was_field_changed( pwa_i_structure ).
+
     DATA(lv_kind) = CONV ze_mdg_acct_group_kind( to_upper( read_char( lc_account_group ) ) ).
     DATA(lv_iso)  = CONV waers( to_upper( read_char( lc_currency ) ) ).
     DATA(lv_bank) = CONV ze_mdg_bank_code( to_upper( read_char( lc_bank_code ) ) ).
