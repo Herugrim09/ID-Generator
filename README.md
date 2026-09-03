@@ -13,7 +13,6 @@ under `src/`.
 | `ZCL_MDG_ID_NUMGEN_FACTORY` | Maps `(entity, project code)` to the concrete generator class / structure |
 | `ZCL_MDG_ID_UIBB_FEEDER` | Generic FPM GUIBB form feeder; on `ZATTR_SELECTED` calls the factory and writes the ID into event key `GENERATED_ID` |
 | `ZIF_MDG_ID_CONSTANTS` | Central constants (project codes, attribute names, fixed values) |
-| `ZCL_MDG_ID_LOGGING` | Application-log wrapper (stub – wire to your BAL log) |
 | `ZCL_MDG_ID_SG_UTIL` | Company code ↔ plant assignment (buffered stub) |
 | `ZCL_MDG_CCTR_RULES` | Rule type container (`TT_FUNC`) |
 

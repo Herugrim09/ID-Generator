@@ -338,13 +338,9 @@ CLASS zcl_mdg_id_numgen_base IMPLEMENTATION.
       DATA(lri_edition_api) = cl_usmd_edition_api=>get_instance( ).
       TRY.
           DATA(lwa_edition) = lri_edition_api->get_edition( iv_edition = lfd_edition ).
-        CATCH cx_usmd_edition INTO DATA(lrcx_edition).
-          zcl_mdg_id_logging=>write_application_log_simple(
-            pfd_i_crequest      = lri_context->mv_crequest_id
-            pfd_i_object        = zcl_mdg_id_logging=>c_object_fi
-            pfd_i_subobject     = zcl_mdg_id_logging=>c_sub_object_wf
-            pit_i_messages      = lrcx_edition->mt_messages
-            pfd_i_exception_obj = lrcx_edition ).
+        CATCH cx_usmd_edition INTO DATA(lrcx_edition) ##NEEDED.
+          " Edition could not be read - write LRCX_EDITION->MT_MESSAGES
+          " to the application log here (project-specific).
           RETURN.
       ENDTRY.
       me->fd_edition_number = lwa_edition-usmd_edtn_number.

@@ -345,7 +345,6 @@ CLASS zcl_mdg_se_cctrid_rule IMPLEMENTATION.
     DATA:
       lfd_field_temp     TYPE string,
       lit_allowtab       TYPE string_hashed_table,
-      lfd_message_s      TYPE string,
       lit_profit_centers TYPE tt_profit_centers.
 
     IF me->it_profit_centers IS NOT INITIAL.
@@ -394,14 +393,8 @@ CLASS zcl_mdg_se_cctrid_rule IMPLEMENTATION.
       WHERE /1md/0gcoarea = @zif_mdg_id_constants=>c_attr_values-coarea-co_sg01. "#EC CI_DYNTAB
 
     IF sy-subrc NE 0.
-      DATA(lri_app_context) = cl_usmd_app_context=>get_context( ).
-      DATA(lfd_crequest_id) = lri_app_context->mv_crequest_id.
-      lfd_message_s = 'No profit center found'(001).
-      zcl_mdg_id_logging=>write_application_log_simple(
-        pfd_i_crequest     = lfd_crequest_id
-        pfd_i_object       = zcl_mdg_id_logging=>c_object_mdg
-        pfd_i_subobject    = zcl_mdg_id_logging=>c_sub_object_wf
-        pfd_i_message_text = lfd_message_s ).
+      " No profit center found for the coarea - write an application log
+      " entry here (project-specific).
     ELSE.
       SORT lit_profit_centers ASCENDING BY key.
       DELETE ADJACENT DUPLICATES FROM lit_profit_centers COMPARING key.
