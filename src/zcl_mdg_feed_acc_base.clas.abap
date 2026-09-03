@@ -11,12 +11,12 @@
 "! class with this one (or a project subclass of it).
 "!
 "! NOTE: INHERITING FROM must be the standard MDG-F feeder that the
-"! ACCOUNT detail UIBB currently uses. CL_MDGF_GUIBB_ACCOUNT is the
+"! ACCOUNT detail UIBB currently uses. CL_MDGF_GUIBB_FI_ACCOUNT is the
 "! usual one; check SE80 -> the entity form config -> Feeder Class and
 "! adjust if your system differs.
 CLASS zcl_mdg_feed_acc_base DEFINITION
   PUBLIC
-  INHERITING FROM cl_mdgf_guibb_account
+  INHERITING FROM cl_mdgf_guibb_fi_account
   CREATE PUBLIC.
 
   PUBLIC SECTION.
