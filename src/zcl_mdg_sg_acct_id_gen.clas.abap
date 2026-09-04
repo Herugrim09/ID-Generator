@@ -46,11 +46,15 @@ CLASS zcl_mdg_sg_acct_id_gen DEFINITION
       IMPORTING !iv_iso        TYPE waers
       RETURNING VALUE(rv_code) TYPE ze_mdg_currency_code .
 
-    "! Position 1-3: group for an account group kind; INITIAL if unknown.
+    "! Reverse of the OVS pick on ACCOUNT_GROUP (positions 1-3, picked
+    "! directly by the user - no more "kind" indirection there): the
+    "! internal symbolic kind for a group code, needed only to route
+    "! PLANNING_DIGIT (MAIN/IHB -> fixed 0, INT_IN -> fixed 1, INT_OUT /
+    "! IHB_INT -> per payment method). INITIAL if the group is unknown.
     "! Derived from ZCL_MDG_SG_BRF_DT=>GET_ACCOUNT_GROUPS.
-    METHODS group_of_kind
-      IMPORTING !iv_kind        TYPE ze_mdg_acct_group_kind
-      RETURNING VALUE(rv_group) TYPE ze_mdg_acct_group .
+    METHODS kind_of_group
+      IMPORTING !iv_group      TYPE ze_mdg_acct_group
+      RETURNING VALUE(rv_kind) TYPE ze_mdg_acct_group_kind .
 
     "! Position 8 digit. MAIN / IHB -> 0, INT_IN -> 1, INT_OUT / IHB_INT
     "! -> per payment method (concept slide 8, ZCL_MDG_SG_BRF_DT=>
@@ -75,24 +79,24 @@ CLASS zcl_mdg_sg_acct_id_gen IMPLEMENTATION.
     " Same first step as CL_P40_MDG_SE_PCTR_ID_GEN=>GENERATE_NUMBER.
     me->was_field_changed( pwa_i_structure ).
 
-    DATA(lv_kind) = CONV ze_mdg_acct_group_kind( to_upper( read_char( lc_account_group ) ) ).
-    DATA(lv_iso)  = CONV waers( to_upper( read_char( lc_currency ) ) ).
-    DATA(lv_bank) = CONV ze_mdg_bank_code( to_upper( read_char( lc_bank_code ) ) ).
-    DATA(lv_pm)   = CONV ze_mdg_payment_method( to_upper( read_char( lc_payment_meth ) ) ).
+    DATA(lv_group) = CONV ze_mdg_acct_group( to_upper( read_char( lc_account_group ) ) ).
+    DATA(lv_iso)   = CONV waers( to_upper( read_char( lc_currency ) ) ).
+    DATA(lv_bank)  = CONV ze_mdg_bank_code( to_upper( read_char( lc_bank_code ) ) ).
+    DATA(lv_pm)    = CONV ze_mdg_payment_method( to_upper( read_char( lc_payment_meth ) ) ).
 
     " Every field of the structure must be filled before an ID is built.
-    IF lv_kind IS INITIAL OR lv_iso IS INITIAL OR lv_bank IS INITIAL OR lv_pm IS INITIAL.
+    IF lv_group IS INITIAL OR lv_iso IS INITIAL OR lv_bank IS INITIAL OR lv_pm IS INITIAL.
       RETURN.
     ENDIF.
 
-    DATA(lv_group) = group_of_kind( lv_kind ).
+    DATA(lv_kind)  = kind_of_group( lv_group ).
     DATA(lv_ccy)   = currency_code( lv_iso ).
     DATA(lv_digit) = planning_digit(
                        iv_kind           = lv_kind
                        iv_payment_method = lv_pm ).
 
-    IF lv_group IS INITIAL OR lv_ccy IS INITIAL OR lv_digit IS INITIAL.
-      " unknown group kind / currency, or Interim Out without a (mapped)
+    IF lv_kind IS INITIAL OR lv_ccy IS INITIAL OR lv_digit IS INITIAL.
+      " unknown group code / currency, or Interim Out without a (mapped)
       " payment method -> cannot build a deterministic ID
       RETURN.
     ENDIF.
@@ -119,8 +123,7 @@ CLASS zcl_mdg_sg_acct_id_gen IMPLEMENTATION.
   METHOD parse_id_into_components.
     DATA: lv_gl   TYPE saknr,
           lv_body TYPE string,
-          lv_iso  TYPE waers,
-          lv_kind TYPE ze_mdg_acct_group_kind.
+          lv_iso  TYPE waers.
 
     CLEAR rr_return.
     lv_gl   = iv_number.
@@ -136,12 +139,11 @@ CLASS zcl_mdg_sg_acct_id_gen IMPLEMENTATION.
     DATA(lv_bank)  = CONV ze_mdg_bank_code( lv_body+3(2) ).
     DATA(lv_ccy)   = CONV ze_mdg_currency_code( lv_body+5(2) ).
 
+    " ACCOUNT_GROUP is the group code itself (positions 1-3) - no more
+    " lookup needed to redisplay it, unlike CURRENCY which still needs
+    " the ISO for the OVS-picked field.
     LOOP AT zcl_mdg_sg_brf_dt=>get_instance( )->get_currency_codes( ) INTO DATA(ls_ccy) WHERE code = lv_ccy.
       lv_iso = ls_ccy-iso.
-      EXIT.
-    ENDLOOP.
-    LOOP AT zcl_mdg_sg_brf_dt=>get_instance( )->get_account_groups( ) INTO DATA(ls_grp) WHERE grp = lv_group.
-      lv_kind = ls_grp-kind.
       EXIT.
     ENDLOOP.
 
@@ -165,7 +167,7 @@ CLASS zcl_mdg_sg_acct_id_gen IMPLEMENTATION.
     ENDIF.
     ASSIGN COMPONENT lc_account_group OF STRUCTURE <lwa_out> TO <lfd_f>.
     IF <lfd_f> IS ASSIGNED.
-      <lfd_f> = lv_kind.
+      <lfd_f> = lv_group.
     ENDIF.
   ENDMETHOD.
 
@@ -192,11 +194,11 @@ CLASS zcl_mdg_sg_acct_id_gen IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD group_of_kind.
+  METHOD kind_of_group.
     DATA(lt) = zcl_mdg_sg_brf_dt=>get_instance( )->get_account_groups( ).
-    READ TABLE lt INTO DATA(ls) WITH KEY kind = iv_kind.
+    READ TABLE lt INTO DATA(ls) WITH KEY grp = iv_group.
     IF sy-subrc = 0.
-      rv_group = ls-grp.
+      rv_kind = ls-kind.
     ENDIF.
   ENDMETHOD.
 

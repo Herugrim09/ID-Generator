@@ -124,10 +124,14 @@ CLASS zcl_mdg_sg_acc_id_a_gen IMPLEMENTATION.
         ENDLOOP.
 
       WHEN lc_account_group.
+        " key = the actual GL account group (pos 1-3, unique) - the user
+        " picks the group directly, no more "kind" indirection. Text is
+        " the description alone; GRP is already shown as the OVS row's
+        " own identifier.
         LOOP AT lo_brf_dt->get_account_groups( ) INTO DATA(ls_grp).
           INSERT VALUE usmdz10_s_ovs_output(
-                   key  = ls_grp-kind
-                   text = |{ ls_grp-grp } - { ls_grp-descr }| ) INTO TABLE lit_out.
+                   key  = ls_grp-grp
+                   text = ls_grp-descr ) INTO TABLE lit_out.
         ENDLOOP.
 
       WHEN lc_payment_meth.
