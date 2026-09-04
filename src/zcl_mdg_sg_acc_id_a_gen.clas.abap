@@ -3,7 +3,7 @@
 "! Sets the project code so the number generator factory resolves
 "! ZCL_MDG_SG_ACCT_ID_GEN, and provides the OVS value helps for the
 "! account group, bank, currency and payment method fields from the
-"! hard-coded rule tables (ZCL_MDG_SG_ACCT_RULES).
+"! BRF+ decision tables (ZCL_MDG_SG_BRF_DT).
 CLASS zcl_mdg_sg_acc_id_a_gen DEFINITION
   PUBLIC
   INHERITING FROM zcl_mdg_0g_acc_id_a_gen
@@ -102,34 +102,36 @@ CLASS zcl_mdg_sg_acc_id_a_gen IMPLEMENTATION.
   METHOD build_ovs_table.
     DATA lit_out TYPE usmdz10_ts_ovs_output.
 
+    DATA(lo_brf_dt) = zcl_mdg_sg_brf_dt=>get_instance( ).
+
     CASE iv_field_name.
       WHEN lc_bank_code.
         " concept slide 6: the user picks a BANK NAME (incl. the
         " "(Bank account# N)" variants); its 2-char "Code for Bank"
         " (03 / 33 / 3A / 3B ...) is what lands in positions 4-5.
         " key = code (unique - bank names are not), text = bank name.
-        LOOP AT zcl_mdg_sg_acct_rules=>get_bank_codes( ) INTO DATA(ls_bank).
+        LOOP AT lo_brf_dt->get_bank_codes( ) INTO DATA(ls_bank).
           INSERT VALUE usmdz10_s_ovs_output(
                    key  = ls_bank-code
                    text = |{ ls_bank-name } ({ ls_bank-code })| ) INTO TABLE lit_out.
         ENDLOOP.
 
       WHEN lc_currency.
-        LOOP AT zcl_mdg_sg_acct_rules=>get_currency_codes( ) INTO DATA(ls_ccy).
+        LOOP AT lo_brf_dt->get_currency_codes( ) INTO DATA(ls_ccy).
           INSERT VALUE usmdz10_s_ovs_output(
                    key  = ls_ccy-iso
                    text = |{ ls_ccy-iso } - { ls_ccy-country }| ) INTO TABLE lit_out.
         ENDLOOP.
 
       WHEN lc_account_group.
-        LOOP AT zcl_mdg_sg_acct_rules=>get_account_groups( ) INTO DATA(ls_grp).
+        LOOP AT lo_brf_dt->get_account_groups( ) INTO DATA(ls_grp).
           INSERT VALUE usmdz10_s_ovs_output(
                    key  = ls_grp-kind
                    text = |{ ls_grp-grp } - { ls_grp-descr }| ) INTO TABLE lit_out.
         ENDLOOP.
 
       WHEN lc_payment_meth.
-        LOOP AT zcl_mdg_sg_acct_rules=>get_planning_levels( ) INTO DATA(ls_pl).
+        LOOP AT lo_brf_dt->get_planning_levels( ) INTO DATA(ls_pl).
           INSERT VALUE usmdz10_s_ovs_output(
                    key  = ls_pl-pmethod
                    text = |{ ls_pl-pmethod } - { ls_pl-descr } ({ ls_pl-level })| ) INTO TABLE lit_out.

@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_MDG_SG_ACCT_RULES</CLSNAME>
+    <CLSNAME>ZCL_MDG_SG_BRF_DT</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>MDG ID Gen: SGRE Bank GL Account Rule Tables</DESCRIPT>
+    <DESCRIPT>MDG ID Gen: SGRE Bank GL Account BRF+ Decision Tables</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

@@ -40,6 +40,26 @@ CLASS zcl_mdg_sg_acct_id_gen DEFINITION
       IMPORTING !iv_number      TYPE any
       RETURNING VALUE(rr_return) TYPE REF TO data .
 
+    "! Position 6-7: 2-char currency code for an ISO currency; INITIAL if
+    "! unknown. Derived from ZCL_MDG_SG_BRF_DT=>GET_CURRENCY_CODES.
+    METHODS currency_code
+      IMPORTING !iv_iso        TYPE waers
+      RETURNING VALUE(rv_code) TYPE ze_mdg_currency_code .
+
+    "! Position 1-3: group for an account group kind; INITIAL if unknown.
+    "! Derived from ZCL_MDG_SG_BRF_DT=>GET_ACCOUNT_GROUPS.
+    METHODS group_of_kind
+      IMPORTING !iv_kind        TYPE ze_mdg_acct_group_kind
+      RETURNING VALUE(rv_group) TYPE ze_mdg_acct_group .
+
+    "! Position 8 digit. MAIN / IHB -> 0, INT_IN -> 1, INT_OUT / IHB_INT
+    "! -> per payment method (concept slide 8, ZCL_MDG_SG_BRF_DT=>
+    "! GET_PLANNING_LEVELS).
+    METHODS planning_digit
+      IMPORTING !iv_kind           TYPE ze_mdg_acct_group_kind
+                !iv_payment_method TYPE ze_mdg_payment_method OPTIONAL
+      RETURNING VALUE(rv_digit)    TYPE ze_mdg_planning_digit .
+
 ENDCLASS.
 
 
@@ -65,9 +85,9 @@ CLASS zcl_mdg_sg_acct_id_gen IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    DATA(lv_group) = zcl_mdg_sg_acct_rules=>group_of_kind( lv_kind ).
-    DATA(lv_ccy)   = zcl_mdg_sg_acct_rules=>currency_code( lv_iso ).
-    DATA(lv_digit) = zcl_mdg_sg_acct_rules=>planning_digit(
+    DATA(lv_group) = group_of_kind( lv_kind ).
+    DATA(lv_ccy)   = currency_code( lv_iso ).
+    DATA(lv_digit) = planning_digit(
                        iv_kind           = lv_kind
                        iv_payment_method = lv_pm ).
 
@@ -116,11 +136,11 @@ CLASS zcl_mdg_sg_acct_id_gen IMPLEMENTATION.
     DATA(lv_bank)  = CONV ze_mdg_bank_code( lv_body+3(2) ).
     DATA(lv_ccy)   = CONV ze_mdg_currency_code( lv_body+5(2) ).
 
-    LOOP AT zcl_mdg_sg_acct_rules=>get_currency_codes( ) INTO DATA(ls_ccy) WHERE code = lv_ccy.
+    LOOP AT zcl_mdg_sg_brf_dt=>get_instance( )->get_currency_codes( ) INTO DATA(ls_ccy) WHERE code = lv_ccy.
       lv_iso = ls_ccy-iso.
       EXIT.
     ENDLOOP.
-    LOOP AT zcl_mdg_sg_acct_rules=>get_account_groups( ) INTO DATA(ls_grp) WHERE grp = lv_group.
+    LOOP AT zcl_mdg_sg_brf_dt=>get_instance( )->get_account_groups( ) INTO DATA(ls_grp) WHERE grp = lv_group.
       lv_kind = ls_grp-kind.
       EXIT.
     ENDLOOP.
@@ -160,6 +180,46 @@ CLASS zcl_mdg_sg_acct_id_gen IMPLEMENTATION.
         CONDENSE rv_value.
       ENDIF.
     ENDIF.
+  ENDMETHOD.
+
+
+  METHOD currency_code.
+    DATA(lt) = zcl_mdg_sg_brf_dt=>get_instance( )->get_currency_codes( ).
+    READ TABLE lt INTO DATA(ls) WITH KEY iso = iv_iso.
+    IF sy-subrc = 0.
+      rv_code = ls-code.
+    ENDIF.
+  ENDMETHOD.
+
+
+  METHOD group_of_kind.
+    DATA(lt) = zcl_mdg_sg_brf_dt=>get_instance( )->get_account_groups( ).
+    READ TABLE lt INTO DATA(ls) WITH KEY kind = iv_kind.
+    IF sy-subrc = 0.
+      rv_group = ls-grp.
+    ENDIF.
+  ENDMETHOD.
+
+
+  METHOD planning_digit.
+    CASE iv_kind.
+      WHEN zcl_mdg_sg_brf_dt=>c_kind-main.
+        rv_digit = '0'.
+      WHEN zcl_mdg_sg_brf_dt=>c_kind-int_in.
+        rv_digit = '1'.
+      WHEN zcl_mdg_sg_brf_dt=>c_kind-ihb.
+        " Confirmed by concept slide 5 example 25399060
+        " (253 + 99 + 06 + 0): IHB main behaves like the external main bank.
+        rv_digit = '0'.
+      WHEN zcl_mdg_sg_brf_dt=>c_kind-int_out OR zcl_mdg_sg_brf_dt=>c_kind-ihb_int.
+        " Confirmed by concept slide 5 example 48899063
+        " (488 + 99 + 06 + 3): IHB interim uses the same position-8
+        " payment-method table as the external Interim Out (485).
+        LOOP AT zcl_mdg_sg_brf_dt=>get_instance( )->get_planning_levels( ) INTO DATA(ls) WHERE pmethod = iv_payment_method.
+          rv_digit = ls-digit.
+          EXIT.
+        ENDLOOP.
+    ENDCASE.
   ENDMETHOD.
 
 ENDCLASS.

@@ -49,7 +49,7 @@ Implements the *SE Bank GL Account Concept (AGORA / WP Treasury)* /
 | Object | Role |
 |---|---|
 | `ZCL_MDG_SG_ACCT_ID_GEN` | Concrete generator. `GENERATE_NUMBER` assembles the GL account from the four picked values – no DB read. `SPLIT_NUMBER` decodes an existing account. |
-| `ZCL_MDG_SG_ACCT_RULES` | Hard-coded lookup tables from the calculator workbook: `GET_BANK_CODES` (201, incl. every "(Bank account# N)" row), `GET_CURRENCY_CODES` (93), `GET_ACCOUNT_GROUPS` (5), `GET_PLANNING_LEVELS` (18). |
+| `ZCL_MDG_SG_BRF_DT` | Decision-table lookups: `GET_BANK_CODES` (201, incl. every "(Bank account# N)" row), `GET_CURRENCY_CODES` (93), `GET_ACCOUNT_GROUPS` (5), `GET_PLANNING_LEVELS` (18). Singleton (`GET_INSTANCE`); each table is buffered on first read so the BRF+ engine is not re-called per request. Row data is meant to come from BRF+ decision tables — the hard-coded `VALUE #( )` in the `LOAD_*` methods (transcribed from the calculator workbook) is the interim fallback; replace each `LOAD_*` body with a BRF+ call, the `GET_*` buffering stays. The `CURRENCY_CODE` / `GROUP_OF_KIND` / `PLANNING_DIGIT` derivation helpers now live on `ZCL_MDG_SG_ACCT_ID_GEN`. |
 | `ZCL_MDG_0G_ACC_ID_A_GEN` | ACCOUNT entity feeder base (`FD_ENTITY = ACCOUNT`). |
 | `ZCL_MDG_SG_ACC_ID_A_GEN` | ACCOUNT / SGRE feeder (inherits `ZCL_MDG_0G_ACC_ID_A_GEN`, `FD_PROJECT_NAME = 'SGRE'`); OVS value helps for account group / bank / currency / payment method. Used as the `FPM_FORM_UIBB` feeder class. |
 | `ZMDG_S_SG_ACCT_NAMING` | UIBB structure: `ACCOUNT_GROUP`, `BANK_CODE`, `CURRENCY`, `PAYMENT_METHOD`. |

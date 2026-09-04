@@ -1,15 +1,24 @@
-"! <p class="shorttext synchronized">MDG ID Gen: SGRE Bank GL Account Rule Tables</p>
-"! Hard-coded lookup tables for the SGRE bank GL account concept
+"! <p class="shorttext synchronized">MDG ID Gen: SGRE Bank GL Account BRF+ Decision Tables</p>
+"! Decision-table data for the SGRE bank GL account concept
 "! (AGORA / WP Treasury), transcribed from SGRE_GL_Bank_Account_calculator.xlsx.
 "! Used by ZCL_MDG_SG_ACCT_ID_GEN and the ACCOUNT naming-convention feeder
 "! (OVS value helps).
 "!
+"! Singleton: GET_INSTANCE returns the shared instance. Each LOAD_* method
+"! is invoked at most once; its result is buffered on the instance, so the
+"! BRF+ engine is not re-called on every ID generation / OVS request.
+"!
+"! Data source: the hard-coded VALUE #( ) tables in the LOAD_* methods are
+"! the interim fallback. Replace each LOAD_* body with a BRF+ call once the
+"! decision tables are modelled - the buffering in the GET_* methods stays
+"! as it is.
+"!
 "! GL account (10 char) = '00' + group(1-3) + bank code(4-5)
 "!                             + currency code(6-7) + planning digit(8)
-CLASS zcl_mdg_sg_acct_rules DEFINITION
+CLASS zcl_mdg_sg_brf_dt DEFINITION
   PUBLIC
   FINAL
-  CREATE PUBLIC.
+  CREATE PRIVATE.
 
   PUBLIC SECTION.
 
@@ -52,40 +61,104 @@ CLASS zcl_mdg_sg_acct_rules DEFINITION
         ihb_int TYPE ze_mdg_acct_group_kind VALUE 'IHB_INT',
       END OF c_kind.
 
+    "! Shared instance. Created on first call.
+    CLASS-METHODS get_instance
+      RETURNING VALUE(rc_instance) TYPE REF TO zcl_mdg_sg_brf_dt.
+
+    METHODS constructor.
+
     "! Bank list for the OVS value help. Every "(Bank account# N)" entry
     "! is a separate row with its own 2-char code - the user picks the
     "! exact one they want (the sequence is a manual choice, not derived).
-    CLASS-METHODS get_bank_codes      RETURNING VALUE(rt_bank)  TYPE tt_bank.
-    CLASS-METHODS get_currency_codes  RETURNING VALUE(rt_ccy)   TYPE tt_ccy.
-    CLASS-METHODS get_account_groups  RETURNING VALUE(rt_group) TYPE tt_group.
-    CLASS-METHODS get_planning_levels RETURNING VALUE(rt_plvl)  TYPE tt_plvl.
-
-    "! 2-char currency code for an ISO currency; INITIAL if unknown.
-    CLASS-METHODS currency_code
-      IMPORTING iv_iso        TYPE waers
-      RETURNING VALUE(rv_code) TYPE ze_mdg_currency_code.
-
-    "! Position 1-3 group for an account group kind.
-    CLASS-METHODS group_of_kind
-      IMPORTING iv_kind        TYPE ze_mdg_acct_group_kind
-      RETURNING VALUE(rv_group) TYPE ze_mdg_acct_group.
-
-    "! Position 8 digit. MAIN -> 0, INT_IN -> 1, INT_OUT -> per payment
-    "! method. IHB / IHB_INT: see TODO - not spelled out in the concept.
-    CLASS-METHODS planning_digit
-      IMPORTING iv_kind           TYPE ze_mdg_acct_group_kind
-                iv_payment_method TYPE ze_mdg_payment_method OPTIONAL
-      RETURNING VALUE(rv_digit)   TYPE ze_mdg_planning_digit.
+    METHODS get_bank_codes      RETURNING VALUE(rt_bank)  TYPE tt_bank.
+    METHODS get_currency_codes  RETURNING VALUE(rt_ccy)   TYPE tt_ccy.
+    METHODS get_account_groups  RETURNING VALUE(rt_group) TYPE tt_group.
+    METHODS get_planning_levels RETURNING VALUE(rt_plvl)  TYPE tt_plvl.
 
   PRIVATE SECTION.
+
+    "! Singleton handle (see GET_INSTANCE).
+    CLASS-DATA rc_my_instance TYPE REF TO zcl_mdg_sg_brf_dt.
+
+    "! Buffered decision-table data. A separate "loaded" flag is kept
+    "! (rather than an IS INITIAL check) because a BRF+ decision table
+    "! may legitimately return no rows.
+    DATA it_bank_codes      TYPE tt_bank.
+    DATA it_currency_codes  TYPE tt_ccy.
+    DATA it_account_groups  TYPE tt_group.
+    DATA it_planning_levels TYPE tt_plvl.
+    DATA fd_bank_loaded     TYPE abap_boolean.
+    DATA fd_currency_loaded TYPE abap_boolean.
+    DATA fd_group_loaded    TYPE abap_boolean.
+    DATA fd_planning_loaded TYPE abap_boolean.
+
+    "! Raw data providers. Interim hard-coded fallback - replace each
+    "! body with a BRF+ call; the GET_* buffering stays unchanged.
+    METHODS load_bank_codes      RETURNING VALUE(rt_bank)  TYPE tt_bank.
+    METHODS load_currency_codes  RETURNING VALUE(rt_ccy)   TYPE tt_ccy.
+    METHODS load_account_groups  RETURNING VALUE(rt_group) TYPE tt_group.
+    METHODS load_planning_levels RETURNING VALUE(rt_plvl)  TYPE tt_plvl.
+
 ENDCLASS.
 
 
 
-CLASS zcl_mdg_sg_acct_rules IMPLEMENTATION.
+CLASS zcl_mdg_sg_brf_dt IMPLEMENTATION.
+
+
+  METHOD get_instance.
+    IF rc_my_instance IS NOT BOUND.
+      CREATE OBJECT rc_my_instance.
+    ENDIF.
+    rc_instance = rc_my_instance.
+  ENDMETHOD.
+
+
+  METHOD constructor.
+    " BRF+ function handle / application context setup goes here once the
+    " decision tables are modelled. The row data itself is fetched lazily
+    " and buffered by the GET_* methods, so nothing to do on construction.
+    RETURN.
+  ENDMETHOD.
 
 
   METHOD get_bank_codes.
+    IF me->fd_bank_loaded = abap_false.
+      me->it_bank_codes  = load_bank_codes( ).
+      me->fd_bank_loaded = abap_true.
+    ENDIF.
+    rt_bank = me->it_bank_codes.
+  ENDMETHOD.
+
+
+  METHOD get_currency_codes.
+    IF me->fd_currency_loaded = abap_false.
+      me->it_currency_codes  = load_currency_codes( ).
+      me->fd_currency_loaded = abap_true.
+    ENDIF.
+    rt_ccy = me->it_currency_codes.
+  ENDMETHOD.
+
+
+  METHOD get_account_groups.
+    IF me->fd_group_loaded = abap_false.
+      me->it_account_groups = load_account_groups( ).
+      me->fd_group_loaded   = abap_true.
+    ENDIF.
+    rt_group = me->it_account_groups.
+  ENDMETHOD.
+
+
+  METHOD get_planning_levels.
+    IF me->fd_planning_loaded = abap_false.
+      me->it_planning_levels = load_planning_levels( ).
+      me->fd_planning_loaded = abap_true.
+    ENDIF.
+    rt_plvl = me->it_planning_levels.
+  ENDMETHOD.
+
+
+  METHOD load_bank_codes.
     rt_bank = VALUE #(
       ( code = '01' name = 'Barclays Bank' swift = 'BARCxxxxXXX, BARCGB22' )
       ( code = '02' name = 'Danske Bank' swift = 'DABADKKK' )
@@ -292,7 +365,7 @@ CLASS zcl_mdg_sg_acct_rules IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_currency_codes.
+  METHOD load_currency_codes.
     rt_ccy = VALUE #(
       ( iso = 'SDG' code = '10' country = 'Sudanese Pound' )
       ( iso = 'MRU' code = '11' country = 'Mauritanian ouguiya' )
@@ -391,7 +464,7 @@ CLASS zcl_mdg_sg_acct_rules IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_account_groups.
+  METHOD load_account_groups.
     rt_group = VALUE #(
       ( kind = c_kind-main    grp = '288' descr = 'External Bank - Main GL account' )
       ( kind = c_kind-int_in  grp = '484' descr = 'Interim In (External)' )
@@ -402,7 +475,7 @@ CLASS zcl_mdg_sg_acct_rules IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_planning_levels.
+  METHOD load_planning_levels.
     " pos 8 <- payment method (Interim Out / Interim IHB). Source: concept
     " slide 8 "Last digit of Bank GL account". Note: payment method 'X'
     " appears twice in the source (digit 6 = SFS netting, digit 5 = tax)
@@ -429,46 +502,6 @@ CLASS zcl_mdg_sg_acct_rules IMPLEMENTATION.
       ( pmethod = 'H' digit = '1' level = 'B1' descr = 'Outgoing - Cheque' )
       ( pmethod = 'G' digit = '1' level = 'B1' descr = 'Outgoing - Cheque' )
     ).
-  ENDMETHOD.
-
-
-  METHOD currency_code.
-    DATA(lt) = get_currency_codes( ).
-    READ TABLE lt INTO DATA(ls) WITH KEY iso = iv_iso.
-    IF sy-subrc = 0.
-      rv_code = ls-code.
-    ENDIF.
-  ENDMETHOD.
-
-
-  METHOD group_of_kind.
-    DATA(lt) = get_account_groups( ).
-    READ TABLE lt INTO DATA(ls) WITH KEY kind = iv_kind.
-    IF sy-subrc = 0.
-      rv_group = ls-grp.
-    ENDIF.
-  ENDMETHOD.
-
-
-  METHOD planning_digit.
-    CASE iv_kind.
-      WHEN c_kind-main.
-        rv_digit = '0'.
-      WHEN c_kind-int_in.
-        rv_digit = '1'.
-      WHEN c_kind-ihb.
-        " Confirmed by concept slide 5 example 25399060
-        " (253 + 99 + 06 + 0): IHB main behaves like the external main bank.
-        rv_digit = '0'.
-      WHEN c_kind-int_out OR c_kind-ihb_int.
-        " Confirmed by concept slide 5 example 48899063
-        " (488 + 99 + 06 + 3): IHB interim uses the same position-8
-        " payment-method table as the external Interim Out (485).
-        LOOP AT get_planning_levels( ) INTO DATA(ls) WHERE pmethod = iv_payment_method.
-          rv_digit = ls-digit.
-          EXIT.
-        ENDLOOP.
-    ENDCASE.
   ENDMETHOD.
 
 
